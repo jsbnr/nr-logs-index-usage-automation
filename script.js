@@ -193,7 +193,7 @@ const getLookupTable = async (accountId,tableName,apiKey) =>  {
         }
     }
     try {
-        const response = await genericServiceCall([200],request,(body)=>{return JSON.parse(body)});
+        const response = await genericServiceCall([200],request,(body)=>{return JSONParseGraphQLResponse(body)});
         console.log("Lookup table:",response.table);
         return response.table;
     } catch(e) {
@@ -326,12 +326,12 @@ async function run() {
 
     //Look for new indexes and if so update lookup table accordingly.
     const discoveredIndexes = await discoverIndexes(currentLookupTable,reportingIndexes);
-    if(AUTO_UPDATE_LOOKUP && discoveredIndexes) {
-        console.log(`Updating lookup table ${LOOKUP_TABLE_NAME} with latest thresholds...`);
+    if(AUTO_UPDATE_LOOKUP && discoveredIndexes && currentLookupTable.rows.length > 0) {
+        console.log(`Updating lookup table ${LOOKUP_TABLE_NAME} with newly found index thresholds...`);
         await updateLookupTable(SOURCE_ACCOUNT_ID,LOOKUP_TABLE_NAME,SOURCE_USER_KEY,currentLookupTable);
     }
 
-    console.log("\n Sending metric data to New Relic")
+    console.log("\nSending metric data to New Relic")
     await analyzeIndexes(currentLookupTable,reportingIndexes);
 
     console.log("We're done!");
