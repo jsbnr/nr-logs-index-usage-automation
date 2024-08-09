@@ -6,6 +6,7 @@
 
 const SOURCE_USER_KEY="NRAK..."; //Source account USER api key (please use a secure cred!)
 const SOURCE_ACCOUNT_ID="0"; //source account ID
+const SOURCE_ACCOUNT_NAME="account name here"; // source account name
 const DEST_INSERT_KEY = "...FFFFNRAL"; //Destination account INGEST api key (please use a secure cred!)
 
 
@@ -305,6 +306,7 @@ const analyzeIndexes = async (lookupTableData,indexData) => {
     let commonMetricBlock={"attributes": {}}
     commonMetricBlock.attributes[`source`]=SOURCE_NAME;
     commonMetricBlock.attributes[`sourceAccountId`]=SOURCE_ACCOUNT_ID;
+    commonMetricBlock.attributes[`sourceAccountName`]=SOURCE_ACCOUNT_NAME;
     let metricsPayLoad=[{ 
         "common" : commonMetricBlock,
         "metrics": metrics
