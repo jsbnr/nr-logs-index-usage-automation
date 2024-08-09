@@ -1,3 +1,9 @@
+//Queries
+
+// select latest(LogIndexUsage), latest(LogIndexUsagePercent), latest(threshold), latest(breaching) from Metric facet indexName since 1 day ago
+// select  max(LogIndexUsagePercent) from Metric facet indexName since 7 day ago timeseries
+
+
 const SOURCE_USER_KEY="NRAK..."; //Source account USER api key (please use a secure cred!)
 const SOURCE_ACCOUNT_ID="0"; //source account ID
 const DEST_INSERT_KEY = "...FFFFNRAL"; //Destination account INGEST api key (please use a secure cred!)
@@ -259,12 +265,13 @@ const analyzeIndexes = async (lookupTableData,indexData) => {
     let metrics=[];
     const timestamp = Date.now();
     let breachingCount=0;
+  
     indexData.forEach((index)=>{
-        const threshold=lookupTableData.rows.find((data)=>{return data[0]=index[LOOKUP_INDEX_KEY_NAME]})[1];
+        const threshold=lookupTableData.rows.find((data)=>{return data[0]==index[LOOKUP_INDEX_KEY_NAME]})[1];
         const value = index[QUERY_FIELD_NAME];
-        const percentOfThreshold = (value / threshold);
-        if(percentOfThreshold >= 1) { breachingCount++; }
-        const breaching = percentOfThreshold >= 1 ? true : false;
+        const percentOfThreshold = (value / threshold) * 100;
+        if(percentOfThreshold >= 100) { breachingCount++; }
+        const breaching = percentOfThreshold >= 100 ? true : false;
         console.log(`Index '${index[LOOKUP_INDEX_KEY_NAME]}' has threshold: ${threshold}, value: ${value}, percent: ${percentOfThreshold.toFixed(2)}% ${breaching ? '[Breaching]':'[OK]'}`);
 
         
@@ -326,6 +333,7 @@ async function run() {
 
     //Look for new indexes and if so update lookup table accordingly.
     const discoveredIndexes = await discoverIndexes(currentLookupTable,reportingIndexes);
+
     if(AUTO_UPDATE_LOOKUP && discoveredIndexes && currentLookupTable.rows.length > 0) {
         console.log(`Updating lookup table ${LOOKUP_TABLE_NAME} with newly found index thresholds...`);
         await updateLookupTable(SOURCE_ACCOUNT_ID,LOOKUP_TABLE_NAME,SOURCE_USER_KEY,currentLookupTable);
